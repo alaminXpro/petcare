@@ -1,0 +1,333 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  //directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+// Authentication Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model User {
+  id                    String                 @id @default(cuid())
+  name                  String?
+  email                 String?                @unique
+  emailVerified         DateTime?
+  image                 String? // You can use gravatar.com to get image profile
+  password              String?
+  role                  UserRole               @default(Customer)
+  accounts              Account[]
+  isTwoFactorEnabled    Boolean                @default(false)
+  twoFactorConfirmation TwoFactorConfirmation?
+  created_at            DateTime               @default(now())
+  updated_at            DateTime               @updatedAt
+
+  Provider              Provider?
+  Posts                 Post[]
+  Feeds                 Feed[]
+  ConversationsSent     Conversation[]  @relation("ConversationsSent")
+  ConversationsReceived Conversation[]  @relation("ConversationsReceived")
+  Messages              Message[]
+  ProductReviews        ProductReview[]
+  ServiceReviews        ServiceReview[]
+  Orders                Order[]
+}
+
+model VerificationToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model ResetPasswordToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorConfirmation {
+  id      String   @id @default(cuid())
+  userId  String   @unique
+  expires DateTime
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// New Models for Pet Care System
+model Provider {
+  userId          String         @id
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  approval_status ApprovalStatus
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+
+  Services Service[]
+  Products Product[]
+  Posts    Post[]
+}
+
+model Service {
+  serviceId      Int           @id @default(autoincrement())
+  serviceType    ServiceType
+  providerId     String
+  provider       Provider      @relation(fields: [providerId], references: [userId], onDelete: Cascade)
+  title          String
+  description    String
+  priceCurrency  String
+  priceAmount    Float
+  images         String[]
+  status         ServiceStatus
+  locations      Json
+  tags           String[]
+  total_bookings Int           @default(0)
+  created_at     DateTime      @default(now())
+  updated_at     DateTime      @updatedAt
+
+  ServiceReviews         ServiceReview[]
+  OrderItems             OrderItem[]
+  conversationReferences ConversationReference[]
+}
+
+model Product {
+  productId     Int         @id @default(autoincrement())
+  productType   ProductType
+  supplierId    String
+  supplier      Provider    @relation(fields: [supplierId], references: [userId], onDelete: Cascade)
+  brand         String
+  tags          String[]
+  name          String
+  description   String
+  priceCurrency String
+  priceAmount   Float
+  total_sold    Int         @default(0)
+  images        String[]
+  stock         Int
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+
+  ProductReviews         ProductReview[]
+  OrderItems             OrderItem[]
+  conversationReferences ConversationReference[]
+}
+
+model ProductReview {
+  reviewId          Int      @id @default(autoincrement())
+  productId         Int
+  customerId        String
+  product           Product  @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  customer          User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  rating            Int
+  comment           String
+  verified_purchase Boolean  @default(false)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+}
+
+model ServiceReview {
+  reviewId         Int      @id @default(autoincrement())
+  serviceId        Int
+  customerId       String
+  service          Service  @relation(fields: [serviceId], references: [serviceId], onDelete: Cascade)
+  customer         User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  rating           Int
+  comment          String
+  verified_booking Boolean  @default(false)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
+
+model Order {
+  orderId          Int            @id @default(autoincrement())
+  customerId       String
+  customer         User           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  order_type       OrderType
+  quantity         Int
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+  payment_status   PaymentStatus
+  order_notes      String?
+  customer_phone   String
+  shipping_address String
+  delivery_status  DeliveryStatus
+  delivery_date    DateTime?
+  transactionId    String
+
+  OrderItems OrderItem[]
+}
+
+model OrderItem {
+  orderItemId Int      @id @default(autoincrement())
+  orderId     Int
+  productId   Int?
+  serviceId   Int?
+  order       Order    @relation(fields: [orderId], references: [orderId], onDelete: Cascade)
+  product     Product? @relation(fields: [productId], references: [productId], onDelete: SetNull)
+  service     Service? @relation(fields: [serviceId], references: [serviceId], onDelete: SetNull)
+  quantity    Int
+  price       Float
+  subtotal    Float
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model Post {
+  postId     Int        @id @default(autoincrement())
+  authorId   String
+  author     Provider   @relation(fields: [authorId], references: [userId], onDelete: Cascade)
+  title      String
+  content    String
+  thumbnail  String?
+  tags       String[]
+  visibility Visibility
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
+}
+
+model Feed {
+  feedId     Int        @id @default(autoincrement())
+  authorId   String
+  author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content    String
+  images     String[]
+  visibility Visibility
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+}
+
+model Conversation {
+  conversationId  Int                @id @default(autoincrement())
+  initiator_id    String
+  recipient_id    String
+  initiator       User               @relation("ConversationsSent", fields: [initiator_id], references: [id], onDelete: Cascade)
+  recipient       User               @relation("ConversationsReceived", fields: [recipient_id], references: [id], onDelete: Cascade)
+  status          ConversationStatus
+  last_message_at DateTime?
+  created_at      DateTime           @default(now())
+  updated_at      DateTime           @updatedAt
+
+  Messages   Message[]
+  References ConversationReference[]
+}
+
+model ConversationReference {
+  referenceId    Int           @id @default(autoincrement())
+  conversationId Int
+  conversation   Conversation  @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
+  reference_type ReferenceType
+  productId      Int?
+  serviceId      Int?
+  product        Product?      @relation(fields: [productId], references: [productId], onDelete: SetNull)
+  service        Service?      @relation(fields: [serviceId], references: [serviceId], onDelete: SetNull)
+}
+
+model Message {
+  messageId      Int          @id @default(autoincrement())
+  conversationId Int
+  senderId       String
+  conversation   Conversation @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  content        String
+  attachment_url String?
+  read_status    Boolean      @default(false)
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @updatedAt
+}
+
+// Enums
+enum UserRole {
+  Admin
+  Provider
+  Customer
+}
+
+enum ApprovalStatus {
+  Approved
+  Pending
+  Rejected
+}
+
+enum ServiceType {
+  Daycare
+  Rescue
+  Vet
+  Adoption
+}
+
+enum ServiceStatus {
+  Active
+  Inactive
+}
+
+enum ProductType {
+  Food
+  Accessories
+}
+
+enum OrderType {
+  Service
+  Product
+}
+
+enum PaymentStatus {
+  Paid
+  Unpaid
+  Pending
+}
+
+enum DeliveryStatus {
+  Delivered
+  Processing
+  Cancelled
+}
+
+enum Visibility {
+  Public
+  Private
+}
+
+enum ConversationStatus {
+  Active
+  Archived
+}
+
+enum ReferenceType {
+  Service
+  Product
+}
