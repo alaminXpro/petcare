@@ -98,7 +98,7 @@ const UsefulFeature = () => {
             <Typography variant='h5'>for Your Furry Friends</Typography>
           </div>
           <Typography className='font-medium text-center'>
-            Professional pet care services tailored to meet all your pet's needs under one roof.
+            Professional pet care services tailored to meet all your pet&apos;s needs under one roof.
           </Typography>
         </div>
         <div>

@@ -1,6 +1,8 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
+
+import { useRouter } from 'next/navigation'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 
@@ -12,12 +14,21 @@ import { toast } from 'sonner'
 
 import { UserRound } from 'lucide-react'
 
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button as MuiButton
+} from '@mui/material'
+
 import { profileSchema } from '@/schemas'
 
 import { Form } from '@/components/ui/form'
 import { FormInput } from '@/components/auth/form-input'
 import { Button } from '@/components/ui/button'
-import { profile } from '@/actions/profile'
+import { profile, deleteAccount } from '@/actions/profile'
 
 import type { ExtendedUser } from '@/types/next-auth'
 import { FormToggle } from '@/components/auth/form-toggle'
@@ -29,6 +40,8 @@ type ProfileFormProps = {
 
 export const ProfileForm = ({ user }: ProfileFormProps) => {
   const [isPending, startTransition] = useTransition()
+  const [open, setOpen] = useState(false)
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -56,8 +69,48 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
     })
   })
 
+  const handleClose = () => setOpen(false)
+
+  const onDelete = () => {
+    startTransition(() => {
+      deleteAccount().then(data => {
+        if (data.success) {
+          toast.success(data.message)
+          router.push('/auth/login')
+        } else {
+          toast.error(data.error.message)
+        }
+
+        handleClose()
+      })
+    })
+  }
+
   return (
     <>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      >
+        <DialogTitle id='alert-dialog-title'>{'Are you absolutely sure?'}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>
+            This action cannot be undone. This will permanently delete your account and remove all your data from our
+            servers.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <MuiButton onClick={handleClose} disabled={isPending} color='primary'>
+            Cancel
+          </MuiButton>
+          <MuiButton onClick={onDelete} disabled={isPending} color='error' variant='contained' autoFocus>
+            {isPending ? 'Deleting...' : 'Delete Account'}
+          </MuiButton>
+        </DialogActions>
+      </Dialog>
+
       <div className='col-span-2 col-start-2 flex justify-center'>
         <Avatar className='w-64 h-64'>
           <AvatarImage src={user.image ?? ''} />
@@ -122,6 +175,10 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
             </Button>
           </form>
         </Form>
+
+        <MuiButton variant='contained' color='error' fullWidth onClick={() => setOpen(true)}>
+          Delete Account
+        </MuiButton>
       </div>
     </>
   )

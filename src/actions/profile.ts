@@ -7,8 +7,8 @@ import bcrypt from 'bcryptjs'
 import { profileSchema } from '@/schemas'
 import { currentUser } from '@/lib/auth'
 import { hashPassword, response } from '@/lib/utils'
-import { getUserByEmail, getUserById, updateUserById } from '@/services/user'
-import { update, auth } from '@/auth'
+import { getUserByEmail, getUserById, updateUserById, deleteUserById } from '@/services/user'
+import { auth } from '@/auth'
 import { deleteTwoFactorConfirmationByUserId } from '@/services/two-factor-confirmation'
 
 import { generateVerificationToken } from '@/services/verification-token'
@@ -44,7 +44,17 @@ export const profile = async (payload: z.infer<typeof profileSchema>) => {
   }
 
   // Check if user does not exist in the database, then return an error.
-  const existingUser = await getUserById(user.id)
+  if (!user.id) {
+    return response({
+      success: false,
+      error: {
+        code: 401,
+        message: 'Unauthorized.'
+      }
+    })
+  }
+
+  const existingUser = user.id ? await getUserById(user.id) : undefined
 
   if (!existingUser) {
     return response({
@@ -146,4 +156,50 @@ export const profile = async (payload: z.infer<typeof profileSchema>) => {
     code: 204,
     message: 'Profile updated.'
   })
+}
+
+export const deleteAccount = async () => {
+  try {
+    const user = await currentUser()
+
+    if (!user) {
+      return response({
+        success: false,
+        error: {
+          code: 401,
+          message: 'Unauthorized.'
+        }
+      })
+    }
+
+    const existingUser = user.id ? await getUserById(user.id) : undefined
+
+    if (!existingUser) {
+      return response({
+        success: false,
+        error: {
+          code: 401,
+          message: 'Unauthorized.'
+        }
+      })
+    }
+
+    await deleteUserById(existingUser.id)
+
+    return response({
+      success: true,
+      code: 204,
+      message: 'Account deleted successfully.'
+    })
+  } catch (error) {
+    console.error('Delete account error:', error)
+
+    return response({
+      success: false,
+      error: {
+        code: 500,
+        message: 'Failed to delete account. Please try again.'
+      }
+    })
+  }
 }

@@ -37,7 +37,7 @@ const Footer = () => {
                   <Logo color='var(--mui-palette-common-white)' />
                 </Link>
                 <Typography color='white' className='lg:max-is-[390px] opacity-[0.78]'>
-                  Dedicated to providing the best care and services for your beloved pets. Your pet's health and
+                  Dedicated to providing the best care and services for your beloved pets. Your pet&apos;s health and
                   happiness are our top priority.
                 </Typography>
                 <div className='flex gap-4'>

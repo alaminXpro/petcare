@@ -112,6 +112,13 @@ export function PostsTable({ data }: PostsTableProps) {
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    filterFns: {
+      fuzzy: (row, columnId, filterValue) => {
+        const value = row.getValue(columnId) as string
+
+        return value.toLowerCase().includes(filterValue.toLowerCase())
+      }
+    },
     initialState: { pagination: { pageSize: 10 } }
   })
 

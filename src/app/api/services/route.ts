@@ -1,16 +1,30 @@
 import { NextResponse } from 'next/server'
-import { Prisma } from '@prisma/client'
+
+import type { ServiceType } from '@prisma/client'
+
 import { db } from '@/lib/db'
 
 // Public route to fetch all services
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    await db.$connect()
+    const { searchParams } = new URL(request.url)
+    const search = searchParams.get('search')
+    const serviceType = searchParams.get('serviceType') as ServiceType | null
+    const location = searchParams.get('location')?.toLowerCase()
 
     const services = await db.service.findMany({
       where: {
-        status: 'Active'
+        status: 'Active',
+        ...(serviceType && { serviceType }),
+        ...(search && {
+          OR: [{ title: { contains: search, mode: 'insensitive' } }, { tags: { hasSome: [search] } }]
+        }),
+        ...(location && {
+          locations: {
+            array_contains: location // Changed from hasSome to array_contains
+          }
+        })
       },
       orderBy: {
         created_at: 'desc'
@@ -29,34 +43,10 @@ export async function GET() {
       }
     })
 
-    await db.$disconnect()
-
-    return NextResponse.json(
-      {
-        success: true,
-        services: services || []
-      },
-      { status: 200 }
-    )
+    return NextResponse.json({ success: true, services })
   } catch (error) {
-    await db.$disconnect()
+    console.error('Error fetching services:', error)
 
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      console.error('Database Error:', {
-        code: error.code,
-        message: error.message,
-        meta: error.meta
-      })
-    } else {
-      console.error('Unexpected Error:', error)
-    }
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Database connection failed. Please try again later.'
-      },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: 'Database connection failed' }, { status: 500 })
   }
 }

@@ -1,57 +1,59 @@
-import { db } from "@/lib/db";
-import { setTokenExpiration } from "@/lib/utils";
-import { v4 as uuid } from "uuid";
+import { v4 as uuid } from 'uuid'
+
+import { db } from '@/lib/db'
+import { setTokenExpiration } from '@/lib/utils'
 
 export const generateVerificationToken = async (email: string) => {
-  const existingToken = await getVerificationTokenByEmail(email);
+  const existingToken = await getVerificationTokenByEmail(email)
+
   if (existingToken) {
-    await deleteVerificationTokenById(existingToken.id);
+    await deleteVerificationTokenById(existingToken.id)
   }
 
-  const token = uuid();
-  const expires = setTokenExpiration();
+  const token = uuid()
+  const expires = setTokenExpiration()
 
   const verificationToken = await db.verificationToken.create({
     data: {
       email,
       token,
-      expires,
-    },
-  });
+      expires
+    }
+  })
 
-  return verificationToken;
-};
+  return verificationToken
+}
 
 export const getVerificationToken = async (token: string) => {
   try {
     const verificationToken = await db.verificationToken.findUnique({
-      where: { token },
-    });
+      where: { token }
+    })
 
-    return verificationToken;
+    return verificationToken
   } catch {
-    return null;
+    return null
   }
-};
+}
 
 export const getVerificationTokenByEmail = async (email: string) => {
   try {
     const verificationToken = await db.verificationToken.findFirst({
-      where: { email },
-    });
+      where: { email }
+    })
 
-    return verificationToken;
+    return verificationToken
   } catch {
-    return null;
+    return null
   }
-};
+}
 
 export const deleteVerificationTokenById = async (id: string) => {
   try {
     return await db.verificationToken.delete({
-      where: { id },
-    });
+      where: { id }
+    })
   } catch {
-    return null;
+    return null
   }
-};
+}

@@ -25,9 +25,16 @@ import {
   IconButton,
   Box,
   Typography,
-  Chip
+  Chip,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Grid
 } from '@mui/material'
 import { ArrowUpDown, Edit, Trash } from 'lucide-react'
+
+import { ProductType } from '@prisma/client'
 
 import { EditProductDialog } from './EditProductDialog'
 import { DeleteProductDialog } from './DeleteProductDialog'
@@ -40,6 +47,22 @@ export function ProductsTable({ data }: ProductsTableProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [productType, setProductType] = useState<ProductType | ''>('')
+
+  const filteredData = useMemo(() => {
+    return data.filter(product => {
+      const matchesSearch =
+        searchQuery === '' ||
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.tags.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+
+      const matchesType = productType === '' || product.productType === productType
+
+      return matchesSearch && matchesType
+    })
+  }, [data, searchQuery, productType])
 
   const columns = useMemo(
     () => [
@@ -117,7 +140,7 @@ export function ProductsTable({ data }: ProductsTableProps) {
   )
 
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -130,13 +153,34 @@ export function ProductsTable({ data }: ProductsTableProps) {
     <>
       <Paper className='w-full'>
         <Box p={2}>
-          <TextField
-            fullWidth
-            value={table.getState().globalFilter || ''}
-            onChange={e => table.setGlobalFilter(e.target.value)}
-            placeholder='Search products...'
-            size='small'
-          />
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={8}>
+              <TextField
+                fullWidth
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder='Search by name, brand, or tags...'
+                size='small'
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth size='small'>
+                <InputLabel>Product Type</InputLabel>
+                <Select
+                  value={productType}
+                  label='Product Type'
+                  onChange={e => setProductType(e.target.value as ProductType | '')}
+                >
+                  <MenuItem value=''>All</MenuItem>
+                  {Object.values(ProductType).map(type => (
+                    <MenuItem key={type} value={type}>
+                      {type}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
         </Box>
         <TableContainer>
           <Table size='small'>
@@ -168,7 +212,7 @@ export function ProductsTable({ data }: ProductsTableProps) {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component='div'
-          count={data.length}
+          count={filteredData.length}
           rowsPerPage={table.getState().pagination.pageSize}
           page={table.getState().pagination.pageIndex}
           onPageChange={(_, page) => table.setPageIndex(page)}

@@ -2,16 +2,29 @@
 
 import Image from 'next/image'
 
+import Link from 'next/link'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import type { Service } from '@/types'
 
-export function ServiceCard({ title, description, priceAmount, priceCurrency, images, serviceType, tags }: Service) {
+export function ServiceCard({
+  serviceId,
+  title,
+  description,
+  priceAmount,
+  priceCurrency,
+  images,
+  serviceType,
+  tags
+}: Service) {
   return (
     <Card className='overflow-hidden'>
-      <div className='relative h-48 w-full'>
-        <Image src={images?.[0] || '/placeholder.png'} alt={title} fill className='object-cover' />
-      </div>
+      <Link href={`/services/${serviceId}`} className='hover:opacity-90 transition-opacity'>
+        <div className='relative h-48 w-full'>
+          <Image src={images?.[0] || '/placeholder.png'} alt={title} fill className='object-cover' />
+        </div>
+      </Link>
       <CardHeader>
         <div className='flex items-center justify-between'>
           <CardTitle className='line-clamp-1'>{title}</CardTitle>
@@ -31,7 +44,9 @@ export function ServiceCard({ title, description, priceAmount, priceCurrency, im
       </CardHeader>
       <CardContent>
         <CardDescription className='line-clamp-2'>{description}</CardDescription>
-        <Button className='w-full mt-4'>Book Now</Button>
+        <Link href={`/services/${serviceId}`} className='hover:opacity-90 transition-opacity'>
+          <Button className='w-full mt-4'>Book Now</Button>
+        </Link>
       </CardContent>
     </Card>
   )

@@ -1,166 +1,183 @@
-// Next Imports
-import Link from 'next/link'
+'use client'
 
-// MUI Imports
+import { useEffect, useState } from 'react'
+
+import Link from 'next/link'
+import Image from 'next/image'
+
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
 import CardContent from '@mui/material/CardContent'
+import CircularProgress from '@mui/material/CircularProgress'
+import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
+import Skeleton from '@mui/material/Skeleton'
+import Button from '@mui/material/Button'
 
-// Vars
-const products = [
-  {
-    imgSrc: '/images/pages/google-home.png',
-    imgAlt: 'Google Home',
-    productName: 'Google - Google Home - White',
-    soldBy: 'Google',
-    inStock: true,
-    price: 299,
-    originalPrice: 359
-  },
-  {
-    imgSrc: '/images/pages/iPhone-11.png',
-    imgAlt: 'Apple iPhone',
-    productName: 'Apple iPhone 11 (64GB, Black)',
-    soldBy: 'Apple',
-    inStock: true,
-    price: 899,
-    originalPrice: 999
-  }
-]
+import { useOrder } from '@/hooks/useOrder'
+import { formatDate } from '@/lib/utils'
 
 const StepConfirmation = () => {
+  const [orderId, setOrderId] = useState<string | null>(null)
+
+  useEffect(() => {
+    setOrderId(sessionStorage.getItem('orderId'))
+  }, [])
+
+  const { order, loading, error } = useOrder(orderId)
+
+  if (loading) {
+    return (
+      <Grid container spacing={6}>
+        <Grid item xs={12}>
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Skeleton variant='circular' width={40} height={40} sx={{ mx: 'auto', mb: 2 }} />
+            <Skeleton variant='text' width={200} sx={{ mx: 'auto' }} />
+          </Box>
+        </Grid>
+        <Grid item xs={12}>
+          <div className='border rounded p-4'>
+            <Skeleton variant='text' width='60%' />
+            <Skeleton variant='text' width='40%' />
+            <Skeleton variant='text' width='50%' />
+          </div>
+        </Grid>
+        <Grid item xs={12} md={8} xl={9}>
+          <div className='border rounded'>
+            {[1, 2].map(item => (
+              <div key={item} className='flex p-4 gap-4 [&:not(:last-child)]:border-be'>
+                <Skeleton variant='rectangular' width={80} height={80} />
+                <div className='flex-1'>
+                  <Skeleton variant='text' width='70%' />
+                  <Skeleton variant='text' width='30%' />
+                  <Skeleton variant='text' width='20%' />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Grid>
+        <Grid item xs={12} md={4} xl={3}>
+          <div className='border rounded p-4'>
+            <Skeleton variant='text' width='100%' />
+            <Skeleton variant='text' width='60%' />
+          </div>
+        </Grid>
+      </Grid>
+    )
+  }
+
+  if (error || !order) {
+    return (
+      <Alert
+        severity='error'
+        sx={{ m: 2 }}
+        action={
+          <Button color='inherit' size='small' component={Link} href='/'>
+            Go Home
+          </Button>
+        }
+      >
+        {error || 'Order not found'}
+      </Alert>
+    )
+  }
+
+  const orderTotal = order.OrderItems.reduce((sum, item) => sum + item.subtotal, 0)
+
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <div className='flex items-center flex-col text-center gap-4'>
           <Typography variant='h4'>Thank You! 😇</Typography>
           <Typography>
-            Your order <span className='font-medium text-textPrimary'>#1536548131</span> has been placed!
+            Your order <span className='font-medium text-textPrimary'>#{order.orderId}</span> has been placed!
           </Typography>
-          <div>
-            <Typography>
-              We sent an email to <span className='font-medium text-textPrimary'>john.doe@example.com</span> with your
-              order confirmation and receipt.
-            </Typography>
-            <Typography>
-              If the email hasn&#39;t arrived within two minutes, please check your spam folder to see if the email was
-              routed there.
-            </Typography>
-          </div>
           <div className='flex items-center gap-2'>
             <i className='ri-time-line text-xl text-textPrimary' />
-            <Typography>Time placed: 25/05/2020 13:35pm</Typography>
+            <Typography>Time placed: {formatDate(order.created_at)}</Typography>
           </div>
         </div>
       </Grid>
+
       <Grid item xs={12}>
         <div className='flex flex-col md:flex-row border rounded'>
           <div className='flex flex-col is-full p-5 gap-4 items-center sm:items-start max-md:[&:not(:last-child)]:border-be md:[&:not(:last-child)]:border-ie'>
             <div className='flex items-center gap-2'>
               <i className='ri-map-pin-line text-xl text-textPrimary' />
               <Typography className='font-medium' color='text.primary'>
-                Shipping
+                Shipping Address
               </Typography>
             </div>
-            <div className='flex flex-col max-sm:items-center'>
-              <Typography>John Doe</Typography>
-              <Typography>4135 Parkway Street,</Typography>
-              <Typography>Los Angeles, CA 90017,</Typography>
-              <Typography>USA</Typography>
-            </div>
-            <Typography className='font-medium'>+123456789</Typography>
+            <Typography>{order.shipping_address}</Typography>
+            <Typography className='font-medium'>{order.customer_phone}</Typography>
           </div>
-          <div className='flex flex-col is-full p-5 gap-4 items-center sm:items-start max-md:[&:not(:last-child)]:border-be md:[&:not(:last-child)]:border-ie'>
-            <div className='flex items-center gap-2'>
-              <i className='ri-bank-card-line text-xl text-textPrimary' />
-              <Typography className='font-medium' color='text.primary'>
-                Billing Address
-              </Typography>
-            </div>
-            <div className='flex flex-col max-sm:items-center'>
-              <Typography>John Doe</Typography>
-              <Typography>4135 Parkway Street,</Typography>
-              <Typography>Los Angeles, CA 90017,</Typography>
-              <Typography>USA</Typography>
-            </div>
-            <Typography className='font-medium'>+123456789</Typography>
-          </div>
+
           <div className='flex flex-col is-full p-5 gap-4 items-center sm:items-start'>
             <div className='flex items-center gap-2'>
-              <i className='ri-ship-2-line text-xl text-textPrimary' />
+              <i className='ri-truck-line text-xl text-textPrimary' />
               <Typography className='font-medium' color='text.primary'>
-                Shipping Method
+                Order Status
               </Typography>
             </div>
-            <Typography className='font-medium'>Preferred Method:</Typography>
-            <div className='flex flex-col max-sm:items-center'>
-              <Typography>Standard Delivery</Typography>
-              <Typography>(Normally 3-4 business days)</Typography>
-            </div>
+            <Chip
+              label={order.delivery_status}
+              color={order.delivery_status === 'Processing' ? 'warning' : 'success'}
+              variant='outlined'
+            />
+            <Chip
+              label={order.payment_status}
+              color={order.payment_status === 'Pending' ? 'warning' : 'success'}
+              variant='outlined'
+            />
           </div>
         </div>
       </Grid>
+
       <Grid item xs={12} md={8} xl={9}>
         <div className='border rounded'>
-          {products.map((product, index) => (
-            <div key={index} className='flex flex-col sm:flex-row items-center [&:not(:last-child)]:border-be'>
-              <img height={80} width={80} src={product.imgSrc} alt={product.imgAlt} />
-              <div className='flex justify-between is-full p-5 gap-4 flex-col sm:flex-row items-center sm:items-start'>
-                <div className='flex flex-col gap-2 items-center sm:items-start'>
-                  <Typography className='font-medium' color='text.primary'>
-                    {product.productName}
-                  </Typography>
-                  <div className='flex items-center gap-1'>
-                    <Typography>Sold By:</Typography>
-                    <Typography href='/' component={Link} onClick={e => e.preventDefault()} color='primary'>
-                      {product.soldBy}
+          {order.OrderItems.map((item, index) => {
+            const itemDetails = item.product || item.service
+
+            if (!itemDetails) return null
+
+            return (
+              <div key={index} className='flex flex-col sm:flex-row items-center [&:not(:last-child)]:border-be p-4'>
+                <Box sx={{ position: 'relative', width: 80, height: 80 }}>
+                  <Image
+                    src={itemDetails.images[0]}
+                    alt={'name' in itemDetails ? itemDetails.name : itemDetails.title}
+                    fill
+                    className='object-cover rounded'
+                  />
+                </Box>
+                <div className='flex justify-between is-full p-5 gap-4 flex-col sm:flex-row items-center sm:items-start'>
+                  <div className='flex flex-col gap-2 items-center sm:items-start'>
+                    <Typography className='font-medium' color='text.primary'>
+                      {'name' in itemDetails ? itemDetails.name : itemDetails.title}
+                    </Typography>
+                    <Typography variant='body2' color='text.secondary'>
+                      Quantity: {item.quantity}
                     </Typography>
                   </div>
-                  {product.inStock && <Chip variant='tonal' size='small' color='success' label='In Stock' />}
-                </div>
-                <div className='flex items-center'>
-                  <Typography color='primary'>{`$${product.price}/`}</Typography>
-                  <Typography color='text.disabled' className='line-through'>
-                    {`$${product.originalPrice}`}
-                  </Typography>
+                  <Typography color='primary'>${item.price.toFixed(2)}</Typography>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </Grid>
+
       <Grid item xs={12} md={4} xl={3}>
         <div className='border rounded'>
-          <CardContent className='flex gap-4 flex-col'>
-            <Typography className='font-medium' color='text.primary'>
-              Price Details
-            </Typography>
-            <div className='flex flex-col gap-4'>
-              <div className='flex items-center justify-between gap-2'>
-                <Typography color='text.primary'>Order Total</Typography>
-                <Typography>$1198.00</Typography>
-              </div>
-              <div className='flex items-center justify-between gap-2'>
-                <Typography color='text.primary'>Delivery Charges</Typography>
-                <div className='flex items-center gap-2'>
-                  <Typography className='line-through' color='text.disabled'>
-                    $5.00
-                  </Typography>
-                  <Chip variant='tonal' size='small' color='success' label='Free' className='uppercase' />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-          <Divider />
           <CardContent>
             <div className='flex items-center justify-between gap-2'>
               <Typography className='font-medium' color='text.primary'>
                 Total
               </Typography>
               <Typography className='font-medium' color='text.primary'>
-                $1198.00
+                ${orderTotal.toFixed(2)}
               </Typography>
             </div>
           </CardContent>

@@ -63,15 +63,15 @@ export const login = async (payload: z.infer<typeof loginSchema>, callbackUrl?: 
   }
 
   // Check if user email isn't verified yet, then return an error.
-  if (!existingUser.emailVerified) {
-    return response({
-      success: false,
-      error: {
-        code: 401,
-        message: 'Your email address is not verified yet. Please check your email.'
-      }
-    })
-  }
+  // if (!existingUser.emailVerified) {
+  //   return response({
+  //     success: false,
+  //     error: {
+  //       code: 401,
+  //       message: 'Your email address is not verified yet. Please check your email.'
+  //     }
+  //   })
+  // }
 
   // Check if user's 2FA are enabled
   if (existingUser.isTwoFactorEnabled && existingUser.email) {

@@ -1,10 +1,11 @@
-import { RegisterForm } from "@/components/form/register-form";
-import type { Metadata } from "next";
+import type { Metadata } from 'next'
+
+import { RegisterForm } from '@/components/form/register-form'
 
 export const metadata: Metadata = {
-  title: "Register",
-};
+  title: 'Register'
+}
 
 export default function RegisterPage() {
-  return <RegisterForm />;
+  return <RegisterForm />
 }

@@ -10,11 +10,21 @@ import type { OrderType } from '@/types/apps/ecommerceTypes'
 import OrderCard from './OrderCard'
 import OrderListTable from './OrderListTable'
 
-const OrderList = ({ orderData }: { orderData?: OrderType[] }) => {
+const OrderList = ({
+  orderData,
+  orderStats
+}: {
+  orderData?: OrderType[]
+  orderStats: {
+    pending: number
+    completed: number
+    failed: number
+  }
+}) => {
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
-        <OrderCard />
+        <OrderCard initialStats={orderStats} />
       </Grid>
       <Grid item xs={12}>
         <OrderListTable orderData={orderData} />

@@ -99,6 +99,10 @@ const HorizontalMenu = () => {
           <MenuItem href='/dashboard/services'>Services</MenuItem>
           <MenuItem href='/dashboard/services/add'>Add Service</MenuItem>
         </SubMenu>
+        <SubMenu label='Orders' icon={<i className='ri-shopping-cart-line' />}>
+          <MenuItem href='/dashboard/manage-order'>Manage Orders</MenuItem>
+          <MenuItem href='/dashboard/my-orders'>My Orders</MenuItem>
+        </SubMenu>
         <SubMenu label='Blog Posts' icon={<i className='ri-article-line' />}>
           <MenuItem href='/dashboard/posts'>Blog Posts</MenuItem>
           <MenuItem href='/dashboard/posts/add'>Add Blog Post</MenuItem>

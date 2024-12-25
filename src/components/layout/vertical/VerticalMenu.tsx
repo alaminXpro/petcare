@@ -74,7 +74,7 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         renderExpandedMenuItemIcon={{ icon: <i className='ri-circle-fill' /> }}
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
       >
-        <MenuSection label='Working'>
+        <MenuSection label='Dashboard'>
           <MenuItem href='/dashboard/providers' icon={<i className='ri-user-line' />}>
             Providers
           </MenuItem>
@@ -91,6 +91,10 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           <SubMenu label='services' icon={<i className='ri-service-line' />}>
             <MenuItem href='/dashboard/services'>Services</MenuItem>
             <MenuItem href='/dashboard/services/add'>Add Service</MenuItem>
+          </SubMenu>
+          <SubMenu label='Orders' icon={<i className='ri-shopping-cart-line' />}>
+            <MenuItem href='/dashboard/manage-order'>Manage Orders</MenuItem>
+            <MenuItem href='/dashboard/my-orders'>My Orders</MenuItem>
           </SubMenu>
           <SubMenu label='Blog Posts' icon={<i className='ri-article-line' />}>
             <MenuItem href='/dashboard/posts'>Blog Posts</MenuItem>

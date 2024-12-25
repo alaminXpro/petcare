@@ -13,6 +13,7 @@ import {
   FaTools
 } from 'react-icons/fa'
 import type { User } from '@prisma/client' // Adjust the import based on your project structure
+import { format } from 'date-fns'
 
 interface ProfileCardProps {
   user: User
@@ -31,6 +32,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   totalProducts,
   totalServices
 }) => {
+  const formatDate = (date: string | null) => {
+    try {
+      return date ? format(new Date(date), 'MM/dd/yyyy') : 'NA'
+    } catch (error) {
+      return 'Invalid date'
+    }
+  }
+
   return (
     <Card>
       <CardHeader
@@ -47,8 +56,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           </Grid>
           <Grid item xs={12} sm={6}>
             <Typography variant='body1'>
-              <FaUserCheck /> Email Verified:{' '}
-              {user.emailVerified ? new Date(user.emailVerified).toLocaleDateString() : 'No'}
+              <FaUserCheck /> Email Verified: {formatDate(user.emailVerified)}
             </Typography>
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -58,7 +66,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           </Grid>
           <Grid item xs={12} sm={6}>
             <Typography variant='body1'>
-              <FaCalendarAlt /> Registered At: {new Date(user.created_at).toLocaleDateString()}
+              <FaCalendarAlt /> Registered At: {formatDate(user.created_at)}
             </Typography>
           </Grid>
           <Grid item xs={12} sm={6}>

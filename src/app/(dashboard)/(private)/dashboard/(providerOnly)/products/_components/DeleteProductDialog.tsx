@@ -20,7 +20,8 @@ export function DeleteProductDialog({ open, onClose, productId }: DeleteProductD
   const handleDelete = async () => {
     if (!productId) {
       toast.error('Product ID is missing')
-      return
+      
+return
     }
 
     setLoading(true)

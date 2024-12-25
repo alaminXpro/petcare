@@ -1,3 +1,5 @@
+'use client'
+
 // React Imports
 import { useEffect, useRef } from 'react'
 
@@ -90,7 +92,7 @@ const OurTeam = () => {
   }, [])
 
   return (
-    <section id='team' className='plb-[100px] bg-backgroundPaper' ref={ref}>
+    <section id='about-us' className='plb-[100px] bg-backgroundPaper' ref={ref}>
       <div className={frontCommonStyles.layoutSpacing}>
         <div className='flex flex-col items-center justify-center'>
           <div className='flex is-full justify-center relative'>

@@ -67,6 +67,8 @@ export async function getProviders() {
   return providers
 }
 
+type ApprovalStatus = 'Pending' | 'Approved' | 'Rejected'
+
 export async function updateProviderStatus(providerId: string, status: ApprovalStatus) {
   try {
     await db.provider.update({

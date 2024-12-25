@@ -94,10 +94,11 @@ const FrontMenu = (props: Props) => {
         href='/'
         className={classnames('font-medium plb-3 pli-1.5 hover:text-primary', {
           'text-primary':
-            !intersections.features &&
-            !intersections.team &&
-            !intersections.faq &&
+            !intersections['about-us'] &&
+            !intersections['products'] &&
+            !intersections['services'] &&
             !intersections['contact-us'] &&
+            !intersections['blogs'] &&
             pathname === ''
         })}
       >
@@ -108,7 +109,7 @@ const FrontMenu = (props: Props) => {
         component={Link}
         href='/products'
         className={classnames('font-medium plb-3 pli-1.5 hover:text-primary', {
-          'text-primary': intersections.features
+          'text-primary': intersections['products']
         })}
       >
         Products
@@ -118,7 +119,7 @@ const FrontMenu = (props: Props) => {
         component={Link}
         href='/services'
         className={classnames('font-medium plb-3 pli-1.5 hover:text-primary', {
-          'text-primary': intersections.team
+          'text-primary': intersections['services']
         })}
       >
         Services
@@ -128,7 +129,7 @@ const FrontMenu = (props: Props) => {
         component={Link}
         href='/about-us'
         className={classnames('font-medium plb-3 pli-1.5 hover:text-primary', {
-          'text-primary': intersections.faq
+          'text-primary': intersections['about-us']
         })}
       >
         About us
@@ -143,12 +144,23 @@ const FrontMenu = (props: Props) => {
       >
         Contact us
       </Typography>
-      <DropdownMenu
+      {/* <DropdownMenu
         mode={mode}
         isBelowLgScreen={isBelowLgScreen}
         isDrawerOpen={isDrawerOpen}
         setIsDrawerOpen={setIsDrawerOpen}
-      />
+      /> */}
+      <Typography
+        color='text.primary'
+        component={Link}
+        href='/blogs'
+        target=''
+        className={classnames('font-medium plb-3 pli-1.5 hover:text-primary', {
+          'text-primary': intersections['blogs']
+        })}
+      >
+        Blogs
+      </Typography>
       <Typography
         color='text.primary'
         component={Link}

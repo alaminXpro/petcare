@@ -70,8 +70,8 @@ export const {
 
       const existingUser = await getUserById(user.id)
 
-      // Prevent sign in without email verification
-      if (!existingUser?.emailVerified) return false
+      // Remove the email verification check
+      // if (!existingUser?.emailVerified) return false
 
       // If user's 2FA checked
       if (existingUser.isTwoFactorEnabled) {

@@ -1,32 +1,30 @@
 import { NextResponse } from 'next/server'
 
-import { Prisma } from '@prisma/client'
+import type { ProductType } from '@prisma/client'
 
 import { db } from '@/lib/db'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // Test database connection
-    await db.$connect()
+    const { searchParams } = new URL(request.url)
+    const search = searchParams.get('search')
+    const productType = searchParams.get('productType') as ProductType | null
 
     const products = await db.product.findMany({
+      where: {
+        ...(productType && { productType }),
+        ...(search && {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { brand: { contains: search, mode: 'insensitive' } },
+            { tags: { hasSome: [search] } }
+          ]
+        })
+      },
       orderBy: {
         created_at: 'desc'
-      },
-      select: {
-        productId: true,
-        name: true,
-        description: true,
-        priceAmount: true,
-        priceCurrency: true,
-        images: true,
-        brand: true,
-        stock: true,
-        productType: true
       }
     })
-
-    await db.$disconnect()
 
     return NextResponse.json(
       {
@@ -38,19 +36,6 @@ export async function GET() {
       }
     )
   } catch (error) {
-    await db.$disconnect()
-
-    // Better error logging
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      console.error('Database Error:', {
-        code: error.code,
-        message: error.message,
-        meta: error.meta
-      })
-    } else {
-      console.error('Unexpected Error:', error)
-    }
-
     return NextResponse.json(
       {
         success: false,

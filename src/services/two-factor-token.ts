@@ -1,57 +1,59 @@
-import { db } from "@/lib/db";
-import { setTokenExpiration } from "@/lib/utils";
-import crypto from "node:crypto";
+import crypto from 'node:crypto'
+
+import { db } from '@/lib/db'
+import { setTokenExpiration } from '@/lib/utils'
 
 export const generateTwoFactorToken = async (email: string) => {
-  const existingToken = await getTwoFactorTokenByEmail(email);
+  const existingToken = await getTwoFactorTokenByEmail(email)
+
   if (existingToken) {
-    await deleteTwoFactorTokenById(existingToken.id);
+    await deleteTwoFactorTokenById(existingToken.id)
   }
 
-  const token = String(crypto.randomInt(100000, 1000000));
-  const expires = setTokenExpiration(60 * 2); // 2 minutes
+  const token = String(crypto.randomInt(100000, 1000000))
+  const expires = setTokenExpiration(60 * 2) // 2 minutes
 
   const twoFactorToken = await db.twoFactorToken.create({
     data: {
       email,
       token,
-      expires,
-    },
-  });
+      expires
+    }
+  })
 
-  return twoFactorToken;
-};
+  return twoFactorToken
+}
 
 export const getTwoFactorToken = async (token: string) => {
   try {
     const twoFactorToken = await db.twoFactorToken.findUnique({
-      where: { token },
-    });
+      where: { token }
+    })
 
-    return twoFactorToken;
+    return twoFactorToken
   } catch {
-    return null;
+    return null
   }
-};
+}
 
 export const getTwoFactorTokenByEmail = async (email: string) => {
   try {
     const twoFactorToken = await db.twoFactorToken.findFirst({
-      where: { email },
-    });
+      where: { email }
+    })
 
-    return twoFactorToken;
+    return twoFactorToken
   } catch {
-    return null;
+    return null
   }
-};
+}
 
 export const deleteTwoFactorTokenById = async (id: string) => {
   try {
     return await db.twoFactorToken.delete({
-      where: { id },
-    });
+      where: { id }
+    })
   } catch {
-    return null;
+    return null
   }
-};
+}

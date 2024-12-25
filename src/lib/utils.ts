@@ -1,15 +1,16 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-import { sign, verify, type SignOptions, type Secret } from "jsonwebtoken";
-import bcrypt from "bcryptjs";
-import { Response, ResponseWithMessage } from "@/types";
+import { type ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+import { sign, verify, type SignOptions, type Secret } from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
+
+import type { Response, ResponseWithMessage } from '@/types'
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs))
 }
 
 export async function hashPassword(password: string) {
-  return await bcrypt.hash(password, await bcrypt.genSalt());
+  return await bcrypt.hash(password, await bcrypt.genSalt())
 }
 
 /**
@@ -18,7 +19,7 @@ export async function hashPassword(password: string) {
  * @return true if the value is expired, false otherwise
  */
 export function isExpired(expires: Date): boolean {
-  return new Date(expires) < new Date();
+  return new Date(expires) < new Date()
 }
 
 /**
@@ -27,7 +28,7 @@ export function isExpired(expires: Date): boolean {
  * @return Generates datetime for the token expiration
  */
 export function setTokenExpiration(exp: number = 60 * 60) {
-  return new Date(new Date().getTime() + 1000 * exp);
+  return new Date(new Date().getTime() + 1000 * exp)
 }
 
 /**
@@ -40,28 +41,37 @@ export function setTokenExpiration(exp: number = 60 * 60) {
 export function signJwt(payload: Record<string, unknown>, options?: SignOptions) {
   return sign(payload, process.env.JWT_SECRET as Secret, {
     ...options,
-    algorithm: "HS256",
-  });
+    algorithm: 'HS256'
+  })
 }
 
 export const verifyJwtToken = <T extends object>(token: string) => {
   try {
-    const decoded = verify(token, process.env.JWT_SECRET as Secret);
+    const decoded = verify(token, process.env.JWT_SECRET as Secret)
+
     return {
       valid: true,
-      decoded: decoded as T,
-    };
+      decoded: decoded as T
+    }
   } catch (error) {
     return {
       valid: false,
-      decoded: null,
-    };
+      decoded: null
+    }
   }
-};
+}
 
 // Overload for response status in server action
-export function response(response: ResponseWithMessage): Response;
-export function response<T extends Record<string, unknown>>(response: Response<T>): Response<T>;
+export function response(response: ResponseWithMessage): Response
+export function response<T extends Record<string, unknown>>(response: Response<T>): Response<T>
+
 export function response<T extends object>(response: T): T {
-  return response;
+  return response
+}
+
+export function formatDate(date: string | Date) {
+  return new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  }).format(new Date(date))
 }

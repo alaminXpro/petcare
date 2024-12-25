@@ -1,4 +1,16 @@
-export const publicRoutes: string[] = ['/', '/verify', '/not-found', '/products', '/product/[productId]', '/services']
+export const publicRoutes: string[] = [
+  '/',
+  '/verify',
+  '/not-found',
+  '/products',
+  '/products/[productId]',
+  '/services',
+  '/services/[serviceId]',
+  '/blogs',
+  '/blogs/[id]',
+  '/about-us',
+  '/contact-us'
+]
 
 export const authRoutes: string[] = [
   '/login',

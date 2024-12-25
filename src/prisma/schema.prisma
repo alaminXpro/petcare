@@ -176,6 +176,7 @@ model Order {
   customer         User           @relation(fields: [customerId], references: [id], onDelete: Cascade)
   order_type       OrderType
   quantity         Int
+  total_amount     Float          // Add total amount field
   created_at       DateTime       @default(now())
   updated_at       DateTime       @updatedAt
   payment_status   PaymentStatus
@@ -185,6 +186,8 @@ model Order {
   delivery_status  DeliveryStatus
   delivery_date    DateTime?
   transactionId    String
+  payment_method   PaymentMethod  // Add payment method field
+  status_history   Json?         // Add status history tracking
 
   OrderItems OrderItem[]
 }
@@ -330,4 +333,10 @@ enum ConversationStatus {
 enum ReferenceType {
   Service
   Product
+}
+
+enum PaymentMethod {
+  CreditCard
+  CashOnDelivery
+  GiftCard
 }

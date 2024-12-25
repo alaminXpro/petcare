@@ -2,6 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 
+import type { ProductType } from '@prisma/client'
+
 import { db } from '@/lib/db'
 import type { ProductFormValues } from '@/lib/validations/product'
 import { auth } from '@/auth'
@@ -38,7 +40,12 @@ export async function addProduct(data: ProductFormValues) {
   }
 }
 
-export async function getProducts() {
+interface ProductFilters {
+  search?: string
+  productType?: ProductType | ''
+}
+
+export async function getProducts(filters?: ProductFilters) {
   try {
     const session = await auth()
 
@@ -56,7 +63,15 @@ export async function getProducts() {
 
     const products = await db.product.findMany({
       where: {
-        supplierId: provider.userId
+        supplierId: provider.userId,
+        ...(filters?.productType && { productType: filters.productType }),
+        ...(filters?.search && {
+          OR: [
+            { name: { contains: filters.search, mode: 'insensitive' } },
+            { brand: { contains: filters.search, mode: 'insensitive' } },
+            { tags: { hasSome: [filters.search] } }
+          ]
+        })
       },
       orderBy: {
         created_at: 'desc'

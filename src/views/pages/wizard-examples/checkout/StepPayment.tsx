@@ -1,3 +1,5 @@
+'use client'
+
 // React Imports
 import { useEffect, useState } from 'react'
 import type { SyntheticEvent } from 'react'
@@ -23,19 +25,54 @@ import CardContent from '@mui/material/CardContent'
 import IconButton from '@mui/material/IconButton'
 import Collapse from '@mui/material/Collapse'
 import Fade from '@mui/material/Fade'
+import Box from '@mui/material/Box'
+
+// Add new import for loading button
+import { LoadingButton } from '@mui/lab'
 
 // Component Imports
-import CustomTabList from '@core/components/mui/TabList'
+import { toast } from 'sonner'
 
-const StepPayment = ({ handleNext }: { handleNext: () => void }) => {
-  // States
+import CustomTabList from '@core/components/mui/TabList'
+import { useCart } from '@/redux-store/hooks/useCart'
+import { createOrder } from '@/app/actions/order'
+
+interface Props {
+  handleNext: () => void
+}
+
+const StepPayment = ({ handleNext }: Props) => {
+  // Add new state for address
+  const [addressData, setAddressData] = useState<{
+    phone: string
+    address: string
+    notes: string
+  } | null>(null)
+
+  const { items, total } = useCart()
+
   const [value, setValue] = useState<string>('credit-card')
   const [openCollapse, setOpenCollapse] = useState<boolean>(true)
   const [openFade, setOpenFade] = useState<boolean>(true)
 
+  // Add loading state
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Add validation check
+  const isCartEmpty = items.length === 0
+
   const handleChange = (event: SyntheticEvent, newValue: string) => {
     setValue(newValue)
   }
+
+  useEffect(() => {
+    // Load address data from session storage
+    const savedAddress = sessionStorage.getItem('checkoutAddress')
+
+    if (savedAddress) {
+      setAddressData(JSON.parse(savedAddress))
+    }
+  }, [])
 
   useEffect(() => {
     if (!openFade) {
@@ -44,6 +81,48 @@ const StepPayment = ({ handleNext }: { handleNext: () => void }) => {
       }, 300)
     }
   }, [openFade])
+
+  const handleCheckout = async () => {
+    try {
+      // Prevent checkout if cart is empty
+      if (isCartEmpty) {
+        toast.error('Your cart is empty')
+
+        return
+      }
+
+      setIsLoading(true) // Start loading
+
+      // Get address data from session storage
+      const addressData = JSON.parse(sessionStorage.getItem('checkoutAddress') || '{}')
+
+      const orderItems = items.map(item => ({
+        type: item.type,
+        id: item.type === 'product' ? item.productId! : item.serviceId!,
+        quantity: item.quantity,
+        price: item.price
+      }))
+
+      const result = await createOrder({
+        customer_phone: addressData.phone,
+        shipping_address: addressData.address,
+        order_notes: addressData.notes,
+        items: orderItems
+      })
+
+      if (result.success) {
+        // Store order ID for confirmation
+        sessionStorage.setItem('orderId', result.order.orderId)
+        handleNext()
+      } else {
+        toast.error(result.message || 'Failed to create order')
+      }
+    } catch (error) {
+      toast.error('Something went wrong')
+    } finally {
+      setIsLoading(false) // Stop loading
+    }
+  }
 
   return (
     <Grid container spacing={6}>
@@ -108,10 +187,15 @@ const StepPayment = ({ handleNext }: { handleNext: () => void }) => {
                       <FormControlLabel control={<Switch defaultChecked />} label='Save Card for future billing?' />
                     </Grid>
                     <Grid item xs={12} className='flex gap-4 pbs-4'>
-                      <Button variant='contained' onClick={handleNext}>
+                      <LoadingButton
+                        loading={isLoading}
+                        variant='contained'
+                        onClick={handleCheckout}
+                        disabled={isCartEmpty}
+                      >
                         Checkout
-                      </Button>
-                      <Button type='reset' variant='outlined' color='secondary'>
+                      </LoadingButton>
+                      <Button type='reset' variant='outlined' color='secondary' disabled={isCartEmpty || isLoading}>
                         Reset
                       </Button>
                     </Grid>
@@ -123,9 +207,9 @@ const StepPayment = ({ handleNext }: { handleNext: () => void }) => {
                   Cash on Delivery is a type of payment method where the recipient make payment for the order at the
                   time of delivery rather than in advance.
                 </Typography>
-                <Button variant='contained' onClick={handleNext}>
+                <LoadingButton loading={isLoading} variant='contained' onClick={handleCheckout} disabled={isCartEmpty}>
                   Pay On Delivery
-                </Button>
+                </LoadingButton>
               </TabPanel>
               <TabPanel value='gift-card'>
                 <Typography className='mbe-4' color='text.primary'>
@@ -139,9 +223,14 @@ const StepPayment = ({ handleNext }: { handleNext: () => void }) => {
                     <TextField fullWidth type='number' label='Gift Card Pin' placeholder='Gift Card Pin' />
                   </Grid>
                   <Grid item xs={12}>
-                    <Button variant='contained' onClick={handleNext}>
+                    <LoadingButton
+                      loading={isLoading}
+                      variant='contained'
+                      onClick={handleCheckout}
+                      disabled={isCartEmpty}
+                    >
                       Redeem Gift Card
-                    </Button>
+                    </LoadingButton>
                   </Grid>
                 </Grid>
               </TabPanel>
@@ -157,17 +246,8 @@ const StepPayment = ({ handleNext }: { handleNext: () => void }) => {
             </Typography>
             <div className='flex flex-col gap-2'>
               <div className='flex items-center justify-between gap-2'>
-                <Typography color='text.primary'>Order Total</Typography>
-                <Typography>$1198.00</Typography>
-              </div>
-              <div className='flex items-center justify-between gap-2'>
-                <Typography color='text.primary'>Delivery Charges</Typography>
-                <div className='flex gap-2'>
-                  <Typography color='text.disabled' className='line-through'>
-                    $5.00
-                  </Typography>
-                  <Chip variant='tonal' size='small' color='success' label='Free' className='uppercase' />
-                </div>
+                <Typography color='text.primary'>Order Total ({items.length} items)</Typography>
+                <Typography>${total.toFixed(2)}</Typography>
               </div>
             </div>
           </CardContent>
@@ -178,32 +258,23 @@ const StepPayment = ({ handleNext }: { handleNext: () => void }) => {
                 <Typography className='font-medium' color='text.primary'>
                   Total
                 </Typography>
-                <Typography className='font-medium'>$1198.00</Typography>
+                <Typography className='font-medium'>${total.toFixed(2)}</Typography>
               </div>
-              <div className='flex items-center justify-between gap-2'>
-                <Typography className='font-medium' color='text.primary'>
-                  Deliver to:
+            </div>
+            {addressData && (
+              <div>
+                <Typography className='font-medium' color='text.primary' sx={{ mb: 1 }}>
+                  Delivery Address:
                 </Typography>
-                <Chip variant='tonal' size='small' color='primary' label='Home' />
+                <Typography>{addressData.address}</Typography>
+                <Typography>Phone: {addressData.phone}</Typography>
+                {addressData.notes && (
+                  <Typography color='text.secondary' sx={{ mt: 1 }}>
+                    Notes: {addressData.notes}
+                  </Typography>
+                )}
               </div>
-            </div>
-            <div>
-              <Typography className='font-medium' color='text.primary'>
-                John Doe (Default),
-              </Typography>
-              <Typography>4135 Parkway Street,</Typography>
-              <Typography>Los Angeles, CA, 90017.</Typography>
-              <Typography>Mobile : +1 906 568 2332</Typography>
-            </div>
-            <Typography
-              href='/'
-              component={Link}
-              onClick={e => e.preventDefault()}
-              className='font-medium'
-              color='primary'
-            >
-              Change address
-            </Typography>
+            )}
           </CardContent>
         </div>
       </Grid>

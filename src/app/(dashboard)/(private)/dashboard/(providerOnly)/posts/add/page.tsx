@@ -235,6 +235,7 @@ const PostAdd = () => {
                             e.preventDefault()
                             const input = e.target as HTMLInputElement
                             const value = input.value.trim()
+
                             if (value) {
                               setValue('thumbnail', value)
                               input.value = ''

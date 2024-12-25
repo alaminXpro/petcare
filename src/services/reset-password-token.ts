@@ -1,57 +1,59 @@
-import { db } from "@/lib/db";
-import { setTokenExpiration } from "@/lib/utils";
-import { v4 as uuid } from "uuid";
+import { v4 as uuid } from 'uuid'
+
+import { db } from '@/lib/db'
+import { setTokenExpiration } from '@/lib/utils'
 
 export const generateResetPasswordToken = async (email: string) => {
-  const existingToken = await getResetPasswordTokenByEmail(email);
+  const existingToken = await getResetPasswordTokenByEmail(email)
+
   if (existingToken) {
-    await deleteResetPasswordTokenById(existingToken.id);
+    await deleteResetPasswordTokenById(existingToken.id)
   }
 
-  const token = uuid();
-  const expires = setTokenExpiration();
+  const token = uuid()
+  const expires = setTokenExpiration()
 
   const resetPasswordToken = await db.resetPasswordToken.create({
     data: {
       email,
       token,
-      expires,
-    },
-  });
+      expires
+    }
+  })
 
-  return resetPasswordToken;
-};
+  return resetPasswordToken
+}
 
 export const getResetPasswordToken = async (token: string) => {
   try {
     const resetPasswordToken = await db.resetPasswordToken.findUnique({
-      where: { token },
-    });
+      where: { token }
+    })
 
-    return resetPasswordToken;
+    return resetPasswordToken
   } catch {
-    return null;
+    return null
   }
-};
+}
 
 export const getResetPasswordTokenByEmail = async (email: string) => {
   try {
     const resetPasswordToken = await db.resetPasswordToken.findFirst({
-      where: { email },
-    });
+      where: { email }
+    })
 
-    return resetPasswordToken;
+    return resetPasswordToken
   } catch {
-    return null;
+    return null
   }
-};
+}
 
 export const deleteResetPasswordTokenById = async (id: string) => {
   try {
     return await db.resetPasswordToken.delete({
-      where: { id },
-    });
+      where: { id }
+    })
   } catch {
-    return null;
+    return null
   }
-};
+}

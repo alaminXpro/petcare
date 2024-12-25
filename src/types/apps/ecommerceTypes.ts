@@ -1,3 +1,5 @@
+import type { DeliveryStatus, PaymentStatus, PaymentMethod } from '@prisma/client'
+
 export type Customer = {
   id: number
   customer: string
@@ -53,18 +55,41 @@ export type ProductType = {
 }
 
 export type OrderType = {
-  id: number
-  order: string
-  customer: string
-  email: string
-  avatar: string
-  payment: number
-  status: string
-  spent: number
-  method: string
-  date: string
-  time: string
-  methodNumber: number
+  orderId: number
+  customerId: string
+  customer: {
+    name: string | null
+    email: string | null
+    image: string | null
+  }
+  order_type: 'Product' | 'Service'
+  quantity: number
+  total_amount: number
+  created_at: Date
+  updated_at: Date
+  payment_status: PaymentStatus
+  order_notes?: string | null
+  customer_phone: string
+  shipping_address: string
+  delivery_status: DeliveryStatus
+  delivery_date?: Date | null
+  transactionId: string
+  payment_method: PaymentMethod
+  status_history?: any
+  OrderItems: Array<{
+    orderItemId: number
+    quantity: number
+    price: number
+    subtotal: number
+    product?: {
+      name: string
+      images: string[]
+    } | null
+    service?: {
+      title: string
+      images: string[]
+    } | null
+  }>
 }
 
 export type ECommerceType = {

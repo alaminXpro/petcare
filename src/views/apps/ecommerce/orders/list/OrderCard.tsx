@@ -1,3 +1,5 @@
+'use client'
+
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -14,30 +16,36 @@ import classnames from 'classnames'
 import CustomAvatar from '@core/components/mui/Avatar'
 
 // Vars
-const data = [
-  {
-    value: 56,
-    title: 'Pending Payment',
-    icon: 'ri-calendar-2-line'
-  },
-  {
-    value: 12689,
-    title: 'Completed',
-    icon: 'ri-check-double-line'
-  },
-  {
-    value: 124,
-    title: 'Refunded',
-    icon: 'ri-wallet-3-line'
-  },
-  {
-    value: 32,
-    title: 'Failed',
-    icon: 'ri-error-warning-line'
-  }
-]
+interface OrderStats {
+  pending: number
+  completed: number
+  failed: number
+}
 
-const OrderCard = () => {
+const OrderCard = ({ initialStats }: { initialStats: OrderStats }) => {
+  const data = [
+    {
+      value: initialStats.pending,
+      title: 'Pending Payment',
+      icon: 'ri-calendar-2-line'
+    },
+    {
+      value: initialStats.completed,
+      title: 'Completed',
+      icon: 'ri-check-double-line'
+    },
+    {
+      value: 124,
+      title: 'Refunded',
+      icon: 'ri-wallet-3-line'
+    },
+    {
+      value: initialStats.failed,
+      title: 'Failed',
+      icon: 'ri-error-warning-line'
+    }
+  ]
+
   // Hooks
   const isBelowMdScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'))
   const isBelowSmScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
