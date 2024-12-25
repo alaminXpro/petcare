@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { Container, Grid, Box } from '@mui/material'
 
 import TawkTo from '@/components/TawkTo'
+import ServiceMetaTags from '@/components/ServiceMetaTags'
 
 import ServiceOverview, { ServiceImages, ServiceDetails } from './ServiceOverview'
 import ReviewSection from './ReviewSection'
@@ -63,6 +64,7 @@ export default async function ServicePage({ params }: { params: { id: string } }
 
   return (
     <Container maxWidth='lg' sx={{ py: 4 }}>
+      <ServiceMetaTags service={service} />
       <TawkTo
         providerId={service.providerId}
         itemInfo={{

@@ -5,6 +5,7 @@ import Head from 'next/head'
 import { Container, Grid, Box } from '@mui/material'
 
 import TawkTo from '@/components/TawkTo'
+import ProductMetaTags from '@/components/ProductMetaTags'
 
 import ProductOverview, { ProductImages, ProductDetails } from './ProductOverview'
 import ReviewSection from './ReviewSection'
@@ -59,6 +60,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
 
   return (
     <Container maxWidth='lg' sx={{ py: 4 }}>
+      <ProductMetaTags product={product} />
       <TawkTo
         providerId={product.supplierId}
         itemInfo={{
