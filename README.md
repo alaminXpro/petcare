@@ -1,34 +1,65 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Pet Care System Web Application 🐾
 
-## Getting Started
+A comprehensive web application that connects pet owners with service providers, enabling seamless access to essential pet care services and products. The platform facilitates booking services, purchasing products, posting reviews, and managing orders through a user-friendly interface.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+## 🚀 Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### For Users:
+- **Authentication**: Secure user registration and login with two-factor authentication.
+- **Profile Management**: Manage personal profiles with profile images (via Gravatar or upload).
+- **Service Booking**: Browse and book services like daycare, veterinary care, and adoption.
+- **Product Shopping**: Purchase pet food, accessories, and more.
+- **Reviews and Ratings**: Share feedback on services and products.
+- **Order Tracking**: View order history and track delivery status.
+- **Real-Time Messaging**: Chat with service providers or sellers.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### For Service Providers:
+- **Profile Verification**: Manage profiles with approval status (Pending, Approved, Rejected).
+- **Service Listings**: Add and update services with descriptions, pricing, locations, and images.
+- **Product Management**: Manage products with stock tracking, tags, and detailed descriptions.
+- **Post Management**: Share posts to connect with users and promote services or products.
+- **Order Management**: View and manage customer orders with detailed insights.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+---
 
-## Learn More
+## 🛠️ Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+### Backend:
+- **[Prisma ORM](https://www.prisma.io/)**: Database modeling and querying.
+- **PostgreSQL**: Robust relational database for secure data storage.
+- **Node.js**: Backend server with RESTful API implementation.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Frontend:
+- **[Next.js](https://nextjs.org/)**: Fast and SEO-friendly frontend framework.
+- **Tailwind CSS**: Modern utility-first CSS framework for responsive designs.
+- **MUI Library**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+### Other Tools:
+- **Vercel**: Hosting the frontend for high performance and scalability.
+---
 
-## Deploy on Vercel
+## 📦 Database Models
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Key Models:
+1. **User**: Handles user authentication, roles, and personal information.
+2. **Provider**: Tracks service provider details and approval status.
+3. **Service**: Stores service details, including type, pricing, and availability.
+4. **Product**: Manages product listings with tags, stock, and pricing.
+5. **Order**: Facilitates order details, including type, quantity, and status.
+6. **Conversation**: Tracks user-to-user and user-to-provider messaging.
+7. **Review**: Manages user feedback for services and products.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+---
+
+## 📖 Installation
+
+### Prerequisites:
+- **Node.js** (v16 or later)
+- **PostgreSQL**
+- **NPM** or **Yarn** or **PNPM**
+
+### Steps: Clone the repository:
+   ```git clone https://github.com/alaminXpro/petcare.git```
+  ```cd pet-care-system```
